@@ -3,13 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal Interactiva</title>
-    <script src="wasm_exec.js"></script>
-    <script type="module">
-        import('./app.js');
-    </script>
+    <title>Console Renderer</title>
+    <style>
+        body {
+            background-color: black;
+            color: green;
+            font-family: monospace;
+            white-space: pre-wrap;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div id="terminal"></div>
+    <div id="console">Loading...</div>
+    <script src="wasm_exec.js"></script>
+    <script>
+    const consoleDiv = document.getElementById("console");
+    const go = new Go();
+
+    WebAssembly.instantiateStreaming(fetch("bin/main.wasm"), go.importObject).then((result) => {
+        go.run(result.instance);
+    });
+
+    // Redirige stdout/stderr al contenedor HTML
+    const print = (text) => {
+        consoleDiv.innerHTML += text + "<br>";
+    };
+
+    console.log = print;
+    console.error = print;
+
+    // Capturar `fmt.Print` en Go
+    const decoder = new TextDecoder("utf-8");
+    const encoder = new TextEncoder("utf-8");
+    const originalWrite = process.stdout.write;
+    process.stdout.write = (chunk) => {
+        const text = decoder.decode(chunk);
+        print(text);
+        originalWrite.call(process.stdout, encoder.encode(text));
+    };
+    </script>
 </body>
 </html>

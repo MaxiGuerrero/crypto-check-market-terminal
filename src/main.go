@@ -4,15 +4,12 @@ import (
 	"crypto-market-terminal/src/backend"
 	"crypto-market-terminal/src/backend/client"
 	"crypto-market-terminal/src/components"
-	"log"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/rivo/tview"
 )
 
 func main() {
-	loadDotEnv()
 	config := backend.NewConfig()
 	table := components.NewTable()
 	service := backend.NewMarketService(
@@ -40,12 +37,5 @@ func updateData(service *backend.MarketService, table *tview.Table, app *tview.A
 			components.AddDataToTable(table, *data)
 		})
 		time.Sleep(1 * time.Second)
-	}
-}
-
-func loadDotEnv() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error to load .env: %v", err)
 	}
 }
